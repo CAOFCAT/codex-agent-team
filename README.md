@@ -2,7 +2,9 @@
 
 [简体中文](README.zh-CN.md)
 
-Local-first multi-agent orchestration for Codex CLI. Plan work in the current Codex session, delegate owned tasks to independent `codex exec` members, track dependencies and results, and resume interrupted teams.
+Make Codex CLI work like a small engineering team.
+
+Codex Agent Team turns a complex goal into a reviewable plan, assigns owned tasks to independent Codex members, tracks dependencies and results, and lets the Captain verify the final outcome. It is useful for implementation, research, testing, documentation, and other multi-step work.
 
 ![Node.js 22+](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
@@ -16,6 +18,38 @@ Local-first multi-agent orchestration for Codex CLI. Plan work in the current Co
 - Offers an optional local dashboard for progress, members, task dependencies, details, and reports.
 - Uses the active Codex profile and its normal approval and sandbox behavior.
 
+## Workflow
+
+```text
+Captain creates a plan
+          |
+          v
+User reviews members, tasks, and dependencies
+          |
+          v
+User approves the plan
+          |
+          v
+Independent Codex members run their assigned tasks
+          |
+          v
+Team Runtime records results and unlocks dependent tasks
+          |
+          v
+Captain reviews the final reports
+```
+
+The runtime keeps task state in `.codex-team/`, including attempts, member reports, process output, and events. A failed or interrupted task can be resumed without rerunning completed tasks.
+
+## Highlights
+
+- **Explicit ownership**. Each task has one member, acceptance criteria, and verification expectations.
+- **Dependency scheduling**. A task starts only after its prerequisites complete.
+- **Recoverable execution**. Interrupted and failed tasks can be resumed with a new attempt.
+- **Approval-aware execution**. Members use the active Codex profile and workspace-write sandbox.
+- **Optional live dashboard**. Opt in per execution to view progress, members, dependencies, task details, and reports in a local browser panel.
+- **No runtime dependencies**. The CLI uses Node.js built-in modules and the built-in test runner.
+
 ## Requirements
 
 - Codex CLI installed and authenticated.
@@ -27,15 +61,13 @@ Local-first multi-agent orchestration for Codex CLI. Plan work in the current Co
 Clone this repository, then link the local CLI:
 
 ```powershell
-git clone https://github.com/<OWNER>/codex-agent-team.git
+git clone https://github.com/CAOFCAT/codex-agent-team.git
 cd codex-agent-team
 npm link
 agent-team doctor
 ```
 
 In Codex's Plugins panel, add the cloned repository's `.agents/plugins/marketplace.json` as a local marketplace and install **Codex Agent Team**. Restart the Codex session so its skill is available. The skill provides the `$agent-team` entry point; the linked CLI runs the local team runtime.
-
-Replace `<OWNER>` with the GitHub account or organization that hosts this repository.
 
 ## Quick start
 
@@ -62,6 +94,39 @@ agent-team resume <team-id> --dashboard
 
 The dashboard binds to `127.0.0.1`, reads only the selected team's local state, and refreshes once per second. It does not accept browser writes or load external scripts, fonts, or images. If the browser cannot be launched, the Team CLI continues and reports the browser error; monitor the run with `agent-team status <team-id>`.
 
+## Example plan
+
+Use a custom plan when the default researcher, implementer, and reviewer roles do not match the work:
+
+```json
+{
+  "members": [
+    { "name": "researcher", "role": "Gather official technical references" },
+    { "name": "reviewer", "role": "Check the result and report blockers" }
+  ],
+  "tasks": [
+    {
+      "id": "research",
+      "subject": "Gather official references",
+      "description": "Find and verify the relevant documentation.",
+      "assignee": "researcher",
+      "dependencies": [],
+      "acceptance": ["Return sources and verified facts."],
+      "verify": ["Check every source URL."]
+    },
+    {
+      "id": "review",
+      "subject": "Review the research",
+      "description": "Check the research report for gaps.",
+      "assignee": "reviewer",
+      "dependencies": ["research"],
+      "acceptance": ["List blockers and confirm readiness."],
+      "verify": ["Read the completed report."]
+    }
+  ]
+}
+```
+
 ## CLI reference
 
 ```text
@@ -75,6 +140,19 @@ agent-team doctor [--json]
 ```
 
 `create` only writes a staged plan. `approve` is required before any member process starts. Members use `--sandbox workspace-write`; the runtime never adds `--full-auto` or `--dangerously-bypass-approvals-and-sandbox`.
+
+## Current scope
+
+The current release targets local Codex CLI workflows. It includes the runtime, the `$agent-team` skill, a local read-only dashboard, resumable state, diagnostics, tests, and a GitHub Actions test workflow.
+
+Remote workers, nested teams, automatic commits, automatic merges, and deployment workflows are outside the current release.
+
+## Roadmap
+
+- Team templates for common research and implementation workflows.
+- More detailed retry and cancellation controls.
+- Per-task cost and token reporting when the active provider exposes usage data.
+- More dashboard views for event history and member output.
 
 ## Development
 
