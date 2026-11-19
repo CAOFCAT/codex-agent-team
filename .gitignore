@@ -1,0 +1,18 @@
+# Local Agent Team state and run output
+.codex-team/
+
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Test and build output
+coverage/
+dist/
+
+# Local environment and OS files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+Desktop.ini

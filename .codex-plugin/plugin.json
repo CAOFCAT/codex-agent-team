@@ -1,0 +1,22 @@
+{
+  "name": "codex-agent-team",
+  "version": "0.1.0",
+  "description": "Local-first multi-agent team orchestration for Codex CLI.",
+  "author": {
+    "name": "Codex Agent Team"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Agent Team",
+    "shortDescription": "Plan and run local Codex Agent teams",
+    "longDescription": "Create reviewable plans, coordinate independent Codex CLI members, track dependencies, resume interrupted work, and optionally view live progress in a local dashboard.",
+    "developerName": "Codex Agent Team",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Use $agent-team when the user wants parallel Codex work with explicit task ownership and verification."
+    ],
+    "brandColor": "#2563eb"
+  }
+}
